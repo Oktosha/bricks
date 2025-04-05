@@ -1,36 +1,26 @@
 import argparse
 import tomllib
-import pattern
 from typing import NamedTuple
-import sys
 
-class PositionInPattern(NamedTuple):
-    x: int
-    y: int
-
-class Point(NamedTuple):
-    x: float
-    y: float
+import pattern
+from geom import Point, PositionInPattern, bottom_left_coordinates_of_a_brick
 
 class Stride(NamedTuple):
     envelope_pos: Point
     steps: list[PositionInPattern]
 
-def generate_coordinates_for_all_bricks(pattern) -> set[PositionInPattern]:
-    coordinates = set()
-    for (y,course) in enumerate(pattern):
-        for (x,_) in enumerate(course):
-            coordinates.add(PositionInPattern(x, y))
-    return coordinates
 
-def bottom_left_coordinates_of_a_brick(brick: PositionInPattern, config: dict, pattern: list[list[str]]) -> Point:
-    y = brick.y * (config["bricks"][pattern[brick.y][brick.x]]["height"] + config["joints"]["bed"])
-    x = 0
-    for x_pos in range(brick.x):
-        x += config["bricks"][pattern[brick.y][x_pos]]["length"] + config["joints"]["head"]
-    return Point(x, y)
+def generate_positions_in_pattern_for_all_bricks(pattern) -> set[PositionInPattern]:
+    positions = set()
+    for y, course in enumerate(pattern):
+        for x, _ in enumerate(course):
+            positions.add(PositionInPattern(x, y))
+    return positions
 
-def find_the_leftmost_of_the_bottomest_unlayed_bricks(remaining_bricks: set[PositionInPattern]):
+
+def find_the_leftmost_of_the_bottomest_unlayed_bricks(
+    remaining_bricks: set[PositionInPattern],
+):
     brick = next(iter(remaining_bricks))
     for e in remaining_bricks:
         if e.y < brick.y:
@@ -39,7 +29,14 @@ def find_the_leftmost_of_the_bottomest_unlayed_bricks(remaining_bricks: set[Posi
             brick = e
     return brick
 
-def can_lay(brick: PositionInPattern, envelope_pos: Point, remaining_bricks: set[PositionInPattern], config: dict, pattern: list[list[str]]) -> bool:
+
+def can_lay(
+    brick: PositionInPattern,
+    envelope_pos: Point,
+    remaining_bricks: set[PositionInPattern],
+    config: dict,
+    pattern: list[list[str]],
+) -> bool:
     brick_bottom_left = bottom_left_coordinates_of_a_brick(brick, config, pattern)
     brick_length = config["bricks"][pattern[brick.y][brick.x]]["length"]
     brick_height = config["bricks"][pattern[brick.y][brick.x]]["height"]
@@ -51,9 +48,12 @@ def can_lay(brick: PositionInPattern, envelope_pos: Point, remaining_bricks: set
     # TODO: check that the joints are within the envelope
     if brick_bottom_left.x < envelope_pos.x or brick_bottom_left.y < envelope_pos.y:
         return False
-    if brick_bottom_left.x + brick_length > envelope_pos.x + envelope_width or brick_bottom_left.y + brick_height > envelope_pos.y + envelope_height:
+    if (
+        brick_bottom_left.x + brick_length > envelope_pos.x + envelope_width
+        or brick_bottom_left.y + brick_height > envelope_pos.y + envelope_height
+    ):
         return False
-    
+
     # Here I check that all the bricks right beneath the given brick are already layed
     if brick.y == 0:
         return True
@@ -61,14 +61,17 @@ def can_lay(brick: PositionInPattern, envelope_pos: Point, remaining_bricks: set
         e_pos = PositionInPattern(e_x, brick.y - 1)
         e_left = bottom_left_coordinates_of_a_brick(e_pos, config, pattern).x
         e_right = e_left + config["bricks"][e_type]["length"]
-        is_right_beneath = e_left <= brick_bottom_left.x + brick_length and e_right >= brick_bottom_left.x
+        is_right_beneath = (
+            e_left <= brick_bottom_left.x + brick_length
+            and e_right >= brick_bottom_left.x
+        )
         if is_right_beneath and e_pos in remaining_bricks:
             return False
     return True
 
 
 def get_instructions(config: dict, pattern: list[list[str]]) -> list[Stride]:
-    remaining_bricks = generate_coordinates_for_all_bricks(pattern)
+    remaining_bricks = generate_positions_in_pattern_for_all_bricks(pattern)
     instructions: list[Stride] = []
     while len(remaining_bricks) > 0:
         next_brick = find_the_leftmost_of_the_bottomest_unlayed_bricks(remaining_bricks)
@@ -88,11 +91,13 @@ def get_instructions(config: dict, pattern: list[list[str]]) -> list[Stride]:
                 break
     return instructions
 
+
 def print_instructions(instructions: list[Stride]):
     for stride in instructions:
         print(f"move {stride.envelope_pos.x} {stride.envelope_pos.y}")
         for step in stride.steps:
             print(f"lay {step.x} {step.y}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
