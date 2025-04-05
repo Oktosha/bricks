@@ -41,16 +41,44 @@ def draw_wall(
     wall = pygame.Surface((wall_width, wall_height))
     wall.fill("white")
 
-    for course_n in range(len(ptrn)):
-        for x_pos in range(len(ptrn[course_n])):
+    i = n_layed_bricks
+    stride = 0
+    while i > len(instructions[stride].steps):
+        i -= len(instructions[stride].steps)
+        stride += 1
+    envelope_color = pygame.Color(0, 0, 0)
+    envelope_color.hsla = (300, 100, 20)
+    pygame.draw.rect(
+        wall,
+        envelope_color,
+        (
+            instructions[stride].envelope_pos.x,
+            instructions[stride].envelope_pos.y,
+            config["envelope"]["width"],
+            config["envelope"]["height"],
+        ),
+    )
+
+    brick_n = 0
+    for stride_n, stride in enumerate(instructions):
+        for brick_pos in stride.steps:
             brick_bottom_left_coords = geom.bottom_left_coordinates_of_a_brick(
-                geom.PositionInPattern(x_pos, course_n), config, ptrn
+                brick_pos, config, ptrn
             )
-            brick_length = config["bricks"][ptrn[course_n][x_pos]]["length"]
-            brick_height = config["bricks"][ptrn[course_n][x_pos]]["height"]
+            brick_type = ptrn[brick_pos.y][brick_pos.x]
+            brick_length = config["bricks"][brick_type]["length"]
+            brick_height = config["bricks"][brick_type]["height"]
+            brick_color = pygame.Color(0, 0, 0)
+            brick_inner_color = pygame.Color(0, 0, 0)
+            if brick_n < n_layed_bricks:
+                brick_color.hsla = ((stride_n % 8) * 45, 100, 40)
+                brick_inner_color.hsla = ((stride_n / len(instructions)) * 270, 100, 30)
+            else:
+                brick_color.hsla = ((stride_n % 8) * 45, 80, 90)
+                brick_inner_color.hsla = ((stride_n / len(instructions)) * 270, 100, 90)
             pygame.draw.rect(
                 wall,
-                "gray",
+                brick_color,
                 (
                     brick_bottom_left_coords.x,
                     brick_bottom_left_coords.y,
@@ -58,6 +86,17 @@ def draw_wall(
                     brick_height,
                 ),
             )
+            pygame.draw.rect(
+                wall,
+                brick_inner_color,
+                (
+                    brick_bottom_left_coords.x + 5,
+                    brick_bottom_left_coords.y + 5,
+                    brick_length - 10,
+                    brick_height - 10,
+                ),
+            )
+            brick_n += 1
 
     return wall
 
@@ -73,6 +112,10 @@ if __name__ == "__main__":
 
     total_n_bricks = get_total_n_bricks(ptrn)
     n_layed_bricks = 0
+
+    print(
+        f"Vizualising laying down {total_n_bricks} bricks in {len(instructions)} strides"
+    )
 
     while running:
 
