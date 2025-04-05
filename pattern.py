@@ -102,14 +102,20 @@ def print_pattern(pattern: list[list[str]]):
         print(" ".join(course))
 
 
+def load_from_file(file) -> list[list[str]]:
+    pattern = []
+    for line in file.readlines():
+        pattern.append(line.strip().split())
+    return pattern
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Pattern",
         description="Creates brick pattern for the given filename.wallconfig",
     )
-    parser.add_argument("filename")
+    parser.add_argument("wallconfig")
     args = parser.parse_args()
-    with open(args.filename, "rb") as f:
+    with open(args.wallconfig, "rb") as f:
         config = tomllib.load(f)
         pattern = get_pattern(config)
         if not (pattern is None):

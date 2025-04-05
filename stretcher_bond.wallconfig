@@ -2,6 +2,11 @@
 
 bond = "stretcher"
 
+[envelope]
+
+width = 800
+height = 1300
+
 [wall]
 
 width = 2300
