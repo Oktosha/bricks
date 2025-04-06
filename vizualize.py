@@ -34,6 +34,7 @@ def draw_wall(
     instructions: list[steps.Stride],
     n_layed_bricks: int,
 ):
+    DEFAULT_FONT = pygame.font.SysFont(pygame.font.get_default_font(), 50)
 
     wall_width = config["wall"]["width"]
     wall_height = config["wall"]["height"]
@@ -47,13 +48,15 @@ def draw_wall(
         i -= len(instructions[stride].steps)
         stride += 1
     envelope_color = pygame.Color(0, 0, 0)
-    envelope_color.hsla = (300, 100, 20)
+    envelope_color.hsla = (0, 0, 20)
     pygame.draw.rect(
         wall,
         envelope_color,
         (
             instructions[stride].envelope_pos.x,
-            instructions[stride].envelope_pos.y,
+            wall_height
+            - instructions[stride].envelope_pos.y
+            - config["envelope"]["height"],
             config["envelope"]["width"],
             config["envelope"]["height"],
         ),
@@ -69,31 +72,29 @@ def draw_wall(
             brick_length = config["bricks"][brick_type]["length"]
             brick_height = config["bricks"][brick_type]["height"]
             brick_color = pygame.Color(0, 0, 0)
-            brick_inner_color = pygame.Color(0, 0, 0)
+            brick_font_color = pygame.Color(0, 0, 0)
             if brick_n < n_layed_bricks:
-                brick_color.hsla = ((stride_n % 8) * 45, 100, 40)
-                brick_inner_color.hsla = ((stride_n / len(instructions)) * 270, 100, 30)
+                brick_color.hsla = (0, 0, 30)
+                brick_font_color.hsla = (0, 0, 100)
             else:
-                brick_color.hsla = ((stride_n % 8) * 45, 80, 90)
-                brick_inner_color.hsla = ((stride_n / len(instructions)) * 270, 100, 90)
+                brick_color.hsla = (0, 0, 80)
+                brick_font_color.hsla = (0, 0, 100)
             pygame.draw.rect(
                 wall,
                 brick_color,
                 (
                     brick_bottom_left_coords.x,
-                    brick_bottom_left_coords.y,
+                    wall_height - brick_bottom_left_coords.y - brick_height,
                     brick_length,
                     brick_height,
                 ),
             )
-            pygame.draw.rect(
-                wall,
-                brick_inner_color,
+            number = DEFAULT_FONT.render(str(stride_n + 1), False, brick_font_color)
+            wall.blit(
+                number,
                 (
-                    brick_bottom_left_coords.x + 5,
-                    brick_bottom_left_coords.y + 5,
-                    brick_length - 10,
-                    brick_height - 10,
+                    brick_bottom_left_coords.x + brick_length / 2,
+                    wall_height - brick_bottom_left_coords.y - brick_height + 8,
                 ),
             )
             brick_n += 1
@@ -152,13 +153,12 @@ if __name__ == "__main__":
         # Put the vizualisation on screen accounting for the window resizing
 
         if SCREEN_WIDTH >= DISPLAY_OFFSET * 3 and SCREEN_HEIGHT >= DISPLAY_OFFSET * 3:
-            displayed_wall = pygame.transform.flip(wall, flip_x=False, flip_y=True)
             width = SCREEN_WIDTH - 2 * DISPLAY_OFFSET
             height = width * wall.get_height() / wall.get_width()
             if height > SCREEN_HEIGHT - 2 * DISPLAY_OFFSET:
                 height = SCREEN_HEIGHT - 2 * DISPLAY_OFFSET
                 width = height * wall.get_width() / wall.get_height()
-            displayed_wall = pygame.transform.scale(displayed_wall, (width, height))
+            displayed_wall = pygame.transform.scale(wall, (width, height))
             screen.blit(
                 displayed_wall,
                 ((SCREEN_WIDTH - width) / 2, (SCREEN_HEIGHT - height) / 2),
