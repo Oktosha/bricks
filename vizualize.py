@@ -1,7 +1,8 @@
-import math
-import pygame
-import tomllib
+import argparse
 import sys
+import tomllib
+
+import pygame
 
 import pattern
 import steps
@@ -15,7 +16,14 @@ DISPLAY_OFFSET = 20
 def arrange_data_for_visualisation() -> (
     tuple[dict, list[list[str]], list[steps.Stride]]
 ):
-    with open("stretcher_bond.wallconfig", "rb") as configfile:
+    parser = argparse.ArgumentParser(
+        prog="Vizualise bricks",
+        description="Visualises laying down different bonds of bricks",
+    )
+    parser.add_argument("--wallconfig")
+    args = parser.parse_args()
+    wallconfig = args.wallconfig if args.wallconfig else "stretcher_bond.wallconfig"
+    with open(wallconfig, "rb") as configfile:
         config = tomllib.load(configfile)
         ptrn = pattern.get_pattern(config)
         instructions = steps.get_instructions(config, ptrn)
@@ -93,8 +101,13 @@ def draw_wall(
             wall.blit(
                 number,
                 (
-                    brick_bottom_left_coords.x + brick_length / 2,
-                    wall_height - brick_bottom_left_coords.y - brick_height + 8,
+                    brick_bottom_left_coords.x
+                    + brick_length / 2
+                    - (number.get_width() / 2),
+                    wall_height
+                    - brick_bottom_left_coords.y
+                    - brick_height / 2
+                    - (number.get_height() / 2),
                 ),
             )
             brick_n += 1
