@@ -1,0 +1,40 @@
+# This is wall configuration file for Flemish bond in TOML notatiton https://toml.io/en/
+
+bond = "flemish"
+
+[envelope]
+
+width = 800
+height = 1300
+
+[wall]
+
+width = 2465
+height = 2000
+
+[joints]
+head = 10
+bed = 12.5
+
+[bricks]
+
+[bricks.f]
+
+name = "full brick"
+width = 100
+length = 210
+height = 50
+
+[bricks.h]
+
+name = "half brick"
+width = 100
+length = 100
+height = 50
+
+[bricks.q]
+
+name = "quater brick"
+width = 100
+length = 45
+height = 50
