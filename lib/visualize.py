@@ -111,13 +111,13 @@ def create_wall(
 
 
 def vizualize(config: dict, ptrn: list[list[str]], instructions: list[Stride]):
-    
+
     # variables for window size and padding
-    
+
     window_width = 1280  # initial window width; can be resized
     window_height = 720  # initial window height; can be resized
     window_padding = 20  # padding between the edge of the window and the visualization
-    
+
     # Initializing pygame
 
     pygame.init()
