@@ -1,10 +1,7 @@
-import argparse
-import tomllib
 import sys
 import math
 from dataclasses import dataclass
 import random
-import geom
 
 EPS = 1e-8
 
@@ -14,6 +11,10 @@ class BrickWithFallenTeethData:
     type: str
     n_left_teeth: int
     n_right_teeth: int
+
+
+def get_total_n_bricks(ptrn: list[list[str]]):
+    return sum(map(len, ptrn))
 
 
 def get_stretcher_bond_even_course(
@@ -577,17 +578,3 @@ def load_from_file(file) -> list[list[str]]:
     for line in file.readlines():
         pattern.append(line.strip().split())
     return pattern
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog="Pattern",
-        description="Creates brick pattern for the given filename.wallconfig",
-    )
-    parser.add_argument("wallconfig")
-    args = parser.parse_args()
-    with open(args.wallconfig, "rb") as f:
-        config = tomllib.load(f)
-        pattern = get_pattern(config)
-        if not (pattern is None):
-            print_pattern(pattern)
