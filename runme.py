@@ -27,7 +27,7 @@ def get_instructions(
         print(f"Loading bricksteps from {filename}", file=sys.stderr)
         file = open(filename, "r")
         return steps.load_from_file(file)
-    print(f"Generating steps...", file=sys.stderr)
+    print(f"Generating steps (can take a few seconds)...", file=sys.stderr)
     return steps.get_instructions(config, ptrn)
 
 
@@ -56,10 +56,21 @@ if __name__ == "__main__":
         help="You may run only the pattern generation or only the steps generation instead of default visualize mode",
     )
     args = parser.parse_args()
-    config = get_config(args.wallconfig)
-    ptrn = get_pattern(args.brickpattern, config)
-    instructions = get_instructions(args.bricksteps, config, ptrn)
-    if args.mode == "visualize":
+
+    if args.mode == "pattern":
+        config = get_config(args.wallconfig)
+        ptrn = get_pattern(args.brickpattern, config)
+        pattern.print_pattern(ptrn)
+    elif args.mode == "steps":
+        config = get_config(args.wallconfig)
+        ptrn = get_pattern(args.brickpattern, config)
+        instructions = get_instructions(args.bricksteps, config, ptrn)
+        steps.print_instructions(instructions)
+    elif args.mode == "visualize":
+        config = get_config(args.wallconfig)
+        ptrn = get_pattern(args.brickpattern, config)
+        instructions = get_instructions(args.bricksteps, config, ptrn)
+
         # I import visualize here because I don't want pygame imported if we aren't in visual mode
         # The problem is that pygame prints a message on import and I don't want this message
         # when the program is used to generate the pattern or the instructions (and you redirect its output to file)
@@ -71,7 +82,3 @@ if __name__ == "__main__":
             file=sys.stderr,
         )
         visualize.vizualize(config, ptrn, instructions)
-    elif args.mode == "pattern":
-        pattern.print_pattern(ptrn)
-    elif args.mode == "steps":
-        steps.print_instructions(instructions)
