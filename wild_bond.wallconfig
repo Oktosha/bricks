@@ -39,7 +39,7 @@ width = 100
 length = 155
 height = 50
 
-[bricks.q]
+[bricks.q] # quater brick isn't layed but it's length is used as a distance measure for "fallen teeth"
 
 name = "quater brick"
 width = 100
